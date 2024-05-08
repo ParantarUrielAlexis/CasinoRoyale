@@ -5,25 +5,43 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="512.0" prefWidth="392.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.casino.HiloController">
+<AnchorPane prefHeight="701.0" prefWidth="462.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.casino.HiloController">
    <children>
-      <Button fx:id="btnHigh" layoutX="190.0" layoutY="81.0" mnemonicParsing="false" onMouseClicked="#btnHighClicked" prefHeight="27.0" prefWidth="164.0" text="High" />
-      <Button fx:id="btnLow" layoutX="190.0" layoutY="344.0" mnemonicParsing="false" onMouseClicked="#btnLowClicked" prefHeight="27.0" prefWidth="164.0" text="Low" />
-      <ImageView fx:id="cardRandomizer" fitHeight="235.0" fitWidth="172.0" layoutX="18.0" layoutY="109.0" pickOnBounds="true" preserveRatio="true">
+      <Button fx:id="btnHigh" disable="true" layoutX="232.0" layoutY="124.0" mnemonicParsing="false" onMouseClicked="#btnHighClicked" prefHeight="50.0" prefWidth="222.0" text="High" />
+      <Button fx:id="btnLow" disable="true" layoutX="232.0" layoutY="489.0" mnemonicParsing="false" onMouseClicked="#btnLowClicked" prefHeight="50.0" prefWidth="222.0" text="Low" />
+      <ImageView fx:id="cardRandomizer" fitHeight="389.0" fitWidth="221.0" layoutX="7.0" layoutY="176.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../../../cards/back.jpg" />
          </image>
       </ImageView>
-      <ImageView fx:id="cardRandomizer2" fitHeight="235.0" fitWidth="172.0" layoutX="191.0" layoutY="109.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="cardRandomizer2" fitHeight="313.0" fitWidth="273.0" layoutX="233.0" layoutY="176.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../../../cards/back.jpg" />
          </image>
       </ImageView>
-      <TextField layoutX="113.0" layoutY="437.0" promptText="Enter Amount" />
-      <Text layoutX="175.0" layoutY="463.0" strokeType="OUTSIDE" strokeWidth="0.0" />
-      <Button fx:id="betID" layoutX="152.0" layoutY="466.0" mnemonicParsing="false" onAction="#playGame" prefHeight="27.0" prefWidth="72.0" text="Bet" />
-      <Text layoutX="246.0" layoutY="404.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Balance: " wrappingWidth="65.336669921875" />
+      <TextField fx:id="inputBalance" layoutX="167.0" layoutY="627.0" promptText="Enter Amount" />
+      <Text layoutX="353.0" layoutY="550.0" strokeType="OUTSIDE" strokeWidth="0.0" />
+      <Button fx:id="betID" layoutX="166.0" layoutY="660.0" mnemonicParsing="false" onAction="#playGame" prefHeight="26.0" prefWidth="150.0" text="Bet" />
+      <Text layoutX="328.0" layoutY="622.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Balance: " wrappingWidth="65.60000000000002">
+         <font>
+            <Font size="15.0" />
+         </font></Text>
+      <Button fx:id="btnSkip" disable="true" layoutX="7.0" layoutY="148.0" mnemonicParsing="false" onAction="#skipCard" prefHeight="26.0" prefWidth="65.0" text="Skip" />
+      <Text fx:id="balanceID" layoutX="394.0" layoutY="620.0" strokeType="OUTSIDE" strokeWidth="0.0" text="50" wrappingWidth="58.399987792968886" />
+      <Text fx:id="oddsLow" layoutX="320.0" layoutY="531.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="45.59991455078125" />
+      <Text fx:id="oddsHigh" layoutX="320.0" layoutY="166.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="45.59991455078125" />
+      <Button fx:id="btnCollect" alignment="BASELINE_LEFT" disable="true" layoutX="7.0" layoutY="489.0" mnemonicParsing="false" onMouseClicked="#collectPayOut" prefHeight="50.0" prefWidth="221.0" text="   Collect: ">
+         <font>
+            <Font name="System Italic" size="23.0" />
+         </font>
+      </Button>
+      <Text fx:id="balancePayout" layoutX="126.0" layoutY="522.0" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="80.53668212890625">
+         <font>
+            <Font size="19.0" />
+         </font>
+      </Text>
    </children>
 </AnchorPane>
