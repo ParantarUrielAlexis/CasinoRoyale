@@ -15,4 +15,5 @@
       <VBox.margin>
          <Insets />
       </VBox.margin></Button>
+   <Button mnemonicParsing="false" onAction="#onSlotMachineBTNClick" text="Slut Machine" />
 </VBox>
