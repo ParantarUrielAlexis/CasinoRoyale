@@ -8,10 +8,14 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -21,9 +25,13 @@ public class HiloController {
 
     @FXML
     public ImageView cardRandomizer;
+
     @FXML
     public ImageView cardRandomizer2;
+
     @FXML
+    public ImageView showLose,showWin, showCollected;
+
     public Button btnHigh;
     @FXML
     public Button btnLow;
@@ -35,16 +43,21 @@ public class HiloController {
     public Button btnSkip, btnCollect;
 
     @FXML
-    public Text balanceID;
+    public Text balanceID, jackpotID;
+
+    @FXML
+    public Text showNoStake, showINoBalance;
     @FXML
     public TextField inputBalance;
 
     @FXML
     public Text oddsHigh, oddsLow, balancePayout;
 
+    MediaPlayer mediaPlayer;
     public int cardNumber1;
-    private double currentMultiplier;
-    public int totalWinnings = 0;
+    private int skipCounter = 1;
+    private int correctGuessCount = 0;
+
     public static final String[] cardImages = {
             "ace_of_spades.png", "ace_of_hearts.png", "ace_of_clubs.png", "ace_of_diamonds.png",
             "2_of_clubs.png", "2_of_diamonds.png", "2_of_spades.png", "2_of_hearts.png",
@@ -137,7 +150,6 @@ public class HiloController {
 
     public void initialized() {
         // Generate random card numbers for each ImageView
-
         cardNumber1 = new Random().nextInt(52); // 0 to 51
         int cardNumber2 = new Random().nextInt(52);
 
@@ -146,44 +158,27 @@ public class HiloController {
         // Get the image file name for cardNumber2
         String imagePath2 = "/cards/" + cardImages[cardNumber2];
 
+        showNoStake.setOpacity(0);
+        showINoBalance.setOpacity(0);
         // Load images for each ImageView based on the card numbers
         try {
             // Load and set the image for cardRandomizer
             Image image1 = new Image(Objects.requireNonNull(getClass().getResourceAsStream(imagePath1)));
-
             cardRandomizer.setImage(image1);
-
-            getMultiplier();
+            setOddsOfCard();
         } catch (NullPointerException e) {
             System.err.println("Error loading image: " + e.getMessage());
             e.printStackTrace();
-        }
-    }
-    public void updateBalance() {
-        // Get the user input from the inputBalance field
-        String userInput = inputBalance.getText();
-
-        // Parse the user input and deduct it from the current balanceID
-        try {
-            int deduction = Integer.parseInt(userInput);
-            int currentBalance = Integer.parseInt(balanceID.getText());
-            int newBalance = currentBalance - deduction;
-            if (newBalance >= 0) {
-                // Update the balanceID with the new balance
-                balanceID.setText(String.valueOf(newBalance));
-            } else {
-                // Display an error message if the deduction exceeds the current balance
-                System.out.println("Insufficient balance.");
-            }
-        } catch (NumberFormatException e) {
-            // Handle invalid input
-            System.err.println("Invalid input: " + userInput);
         }
     }
 
 
 
     public int playGame() {
+        if (inputBalance.getText().isEmpty()) {
+            showNoStake.setOpacity(1);
+            return -1; // Return -1 to indicate no bet amount entered
+        }
         // Deduct the bet amount from the balance
         int betAmount = Integer.parseInt(inputBalance.getText()); // Get the bet amount from the input
         int currentBalance = Integer.parseInt(balanceID.getText()); // Get the current balance
@@ -191,20 +186,21 @@ public class HiloController {
         if (newBalance >= 0) { // Ensure the balance is not negative
             balanceID.setText(String.valueOf(newBalance)); // Update the balance text
         } else {
-            System.out.println("Insufficient balance."); // Display an error message if balance is insufficient
+            showINoBalance.setOpacity(1);
             return -1; // Return -1 to indicate insufficient balance
         }
 
         // Initialize the game
+        cardSound();
         initialized();
+        setOddsOfCard();
         // Enable/disable buttons as needed
         btnHigh.setDisable(false);
         btnLow.setDisable(false);
         btnSkip.setDisable(false);
-        btnCollect.setDisable(false);
-
+        btnCollect.setDisable(true);
         betID.setDisable(true);
-        getMultiplier();
+        balancePayout.setText(String.valueOf(betAmount));
         return cardNumber1;
     }
 
@@ -212,6 +208,17 @@ public class HiloController {
 
     public void btnHighClicked(MouseEvent actionEvent) {
         // Generate random card number for cardNumber2
+        disableCollectButton();
+        int betAmount = Integer.parseInt(inputBalance.getText()); // Get the bet amount from the input
+        String oddsHighVal = oddsHigh.getText().toString();
+        if (!oddsHighVal.isEmpty()){
+            double payout = Double.parseDouble(oddsHighVal);
+            int initialPayout = (int) (betAmount * payout);
+            int netWin = initialPayout - betAmount;
+            int currentBalance = Integer.parseInt(balancePayout.getText());
+            int finalBalance = currentBalance + netWin;
+            balancePayout.setText(String.valueOf(finalBalance));
+        }
         int cardNumber2 = new Random().nextInt(52); // 0 to 51
 
         // Load image for cardRandomizer2 based on the card number
@@ -219,20 +226,31 @@ public class HiloController {
 
         // Load image and set it to cardRandomizer2
         try {
+
             Image image2 = new Image(Objects.requireNonNull(getClass().getResourceAsStream(imagePath2)));
             cardRandomizer2.setImage(image2);
-            // Compare the cards and print the result based on user's guess (High)
-            compareCards(cardNumber1, cardNumber2, true); // Pass cardNumber2 and the guess (High)
-            getMultiplier();
-            showMultiplier();
+            compareCards(cardNumber1, cardNumber2, true);
+            setOddsOfCard();
         } catch (NullPointerException e) {
             System.err.println("Error loading image: " + e.getMessage());
             e.printStackTrace();
         }
+
     }
 
     public void btnLowClicked(MouseEvent actionEvent) {
         // Generate random card number for cardNumber2
+        disableCollectButton();
+        int betAmount = Integer.parseInt(inputBalance.getText()); // Get the bet amount from the input
+        String oddsLowVal = oddsLow.getText().toString();
+        if (!oddsLowVal.isEmpty()){
+            double payout = Double.parseDouble(oddsLowVal);
+            int initialPayout = (int) (betAmount * payout);
+            int netWin = initialPayout - betAmount;
+            int currentBalance = Integer.parseInt(balancePayout.getText());
+            int finalBalance = currentBalance + netWin;
+            balancePayout.setText(String.valueOf(finalBalance));
+        }
         int cardNumber2 = new Random().nextInt(52); // 0 to 51
 
         // Load image for cardRandomizer2 based on the card number
@@ -240,22 +258,18 @@ public class HiloController {
 
         // Load image and set it to cardRandomizer2
         try {
+
             Image image2 = new Image(Objects.requireNonNull(getClass().getResourceAsStream(imagePath2)));
             cardRandomizer2.setImage(image2);
-
             // Compare the cards and print the result based on user's guess (Low)
             compareCards(cardNumber1, cardNumber2, false); // Pass cardNumber2 and the guess (Low)
-            getMultiplier();
-            showMultiplier();
+            setOddsOfCard();
         } catch (NullPointerException e) {
             System.err.println("Error loading image: " + e.getMessage());
             e.printStackTrace();
         }
+
     }
-
-
-
-
 
     public void compareCards(int cardNumber1, int cardNumber2, boolean isHigh) {
         // Get the image file name for cardNumber2
@@ -271,24 +285,22 @@ public class HiloController {
         if (cardValue1 != null && cardValue2 != null) {
             // Print the result based on user's guess (High or Low)
             if ((isHigh && cardValue2 >= cardValue1) || (!isHigh && cardValue2 <= cardValue1)) {
-                System.out.println("You win!");
-
+                winSound();
+                showWinForAMoment();
+                disableButtonsForTwoSeconds();
                 updateCardRandomizer();
                 resetCard2AfterDelay();
+                setJackpot();
             } else {
-                System.out.println("You lose!");
+                loseSound();
+                showLoseForAMoment();
                 showCardForAMoment();
+                balancePayout.setText("");
+
             }
         } else {
             System.err.println("Error: Card values not found for one or both cards.");
         }
-
-        // Pause for 2 seconds before resetting cardRandomizer2
-        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(1));
-        pauseTransition.setOnFinished(event -> {
-
-        });
-        pauseTransition.play();
     }
     private void resetCard2AfterDelay() {
         PauseTransition pauseTransition = new PauseTransition(Duration.seconds(1));
@@ -298,9 +310,10 @@ public class HiloController {
         pauseTransition.play();
     }
 
+
     private void showCardForAMoment() {
         // Pause for 1 second before resetting the game
-        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(1));
+        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(2));
         pauseTransition.setOnFinished(event -> {
             resetCard2();
             resetGame();
@@ -311,7 +324,7 @@ public class HiloController {
         btnSkip.setDisable(true);
         btnCollect.setDisable(true);
         betID.setDisable(false);
-        resetBalancePayout();
+        disableBetButtonForTwoSeconds();
     }
     public void updateCardRandomizer() {
         // Generate a new random card number for cardRandomizer (cardNumber1)
@@ -327,13 +340,56 @@ public class HiloController {
             e.printStackTrace();
         }
     }
+    public void showWinForAMoment() {
+        showWin.setOpacity(1);
 
+        // Pause for 2 seconds before hiding the element
+        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(2));
+        pauseTransition.setOnFinished(event -> {
+            showWin.setOpacity(0);
+        });
+        pauseTransition.play();
+    }
+
+    public void showLoseForAMoment() {
+        showLose.setOpacity(1);
+
+        // Pause for 2 seconds before hiding the element
+        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(2));
+        pauseTransition.setOnFinished(event -> {
+            showLose.setOpacity(0);
+        });
+        pauseTransition.play();
+    }
+
+    public void disableButtonsForTwoSeconds() {
+        // Disable the buttons
+        btnHigh.setDisable(true);
+        btnLow.setDisable(true);
+        btnSkip.setDisable(true);
+        btnCollect.setDisable(true);
+
+        // Pause for 2 seconds before enabling the buttons
+        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(2));
+        pauseTransition.setOnFinished(event -> {
+            btnHigh.setDisable(false);
+            btnLow.setDisable(false);
+            if(skipCounter >= 8){
+                skipCounter++;
+                disableSkipButton();
+            } else {
+                btnSkip.setDisable(false);
+            }
+            btnCollect.setDisable(false);
+        });
+        pauseTransition.play();
+    }
 
 
     public void resetCard2() {
         try {
             // Load the back image for cardRandomizer2
-            InputStream inputStream = getClass().getResourceAsStream("/cards/back.jpg");
+            InputStream inputStream = getClass().getResourceAsStream("/cards/cardbg.jpg");
             if (inputStream != null) {
                 Image backImage = new Image(inputStream);
                 cardRandomizer2.setImage(backImage);
@@ -347,8 +403,10 @@ public class HiloController {
     }
     public void resetGame() {
         // Reset cardRandomizer to "back.jpg"
+        oddsLow.setText("");
+        oddsHigh.setText("");
         try {
-            InputStream inputStream = getClass().getResourceAsStream("/cards/back.jpg");
+            InputStream inputStream = getClass().getResourceAsStream("/cards/cardbg.jpg");
             if (inputStream != null) {
                 Image backImage = new Image(inputStream);
                 cardRandomizer.setImage(backImage);
@@ -359,168 +417,169 @@ public class HiloController {
             System.err.println("Error loading back image: " + e.getMessage());
             e.printStackTrace();
         }
-
+        skipCounter = 1;
     }
 
     public void skipCard(ActionEvent actionEvent) {
-        initialized();
-    }
-
-    // Define instance variables to store current odds
-    private double currentOddsHigh;
-    private double currentOddsLow;
-
-    public void getMultiplier(){
-        int totalCards = 52;
-        int currentCardVal = cardValuesMap.get(cardImages[cardNumber1]);
-
-        int higherCards = 13 - currentCardVal; // Number of cards higher
-        int lowerCards = currentCardVal - 1; // Number of cards lower
-
-        // Calculate the probability of winning for High and Low bets
-        double probabilityHigh = (double) higherCards / totalCards;
-        double probabilityLow = (double) lowerCards / totalCards;
-
-        // Adjust probabilities if the current card is an Ace
-        if (currentCardVal == 1) {
-            if (!btnLow.isDisabled()) {
-                oddsLow.setText("0.89");
-            }
-            if (!btnHigh.isDisabled()) {
-                oddsHigh.setText("13.21");
-            }
-        } else if(currentCardVal == 2){
-            if(!btnLow.isDisabled()){
-                oddsLow.setText("6.21");
-            }
-            if(!btnHigh.isDisabled()){
-                oddsHigh.setText("1.01");
-            }
-        } else if(currentCardVal == 3){
-            if(!btnLow.isDisabled()){
-                oddsLow.setText("3.32");
-            }
-            if(!btnHigh.isDisabled()){
-                oddsHigh.setText("1.01");
-            }
-        }else if(currentCardVal == 4){
-            if(!btnLow.isDisabled()){
-                oddsLow.setText("2.81");
-            }
-            if(!btnHigh.isDisabled()){
-                oddsHigh.setText("1.31");
-            }
-        }else if(currentCardVal == 5){
-            if(!btnLow.isDisabled()){
-                oddsLow.setText("2.21");
-            }
-            if(!btnHigh.isDisabled()){
-                oddsHigh.setText("1.42");
-            }
-        }else if(currentCardVal == 6){
-            if(!btnLow.isDisabled()){
-                oddsLow.setText("1.86");
-            }
-            if(!btnHigh.isDisabled()){
-                oddsHigh.setText("1.91");
-            }
-        } else if(currentCardVal == 7){
-            if(!btnLow.isDisabled()){
-                oddsLow.setText("1.92");
-            }
-            if(!btnHigh.isDisabled()){
-                oddsHigh.setText("2.03");
-            }
-        }else if(currentCardVal == 8){
-            if(!btnLow.isDisabled()){
-                oddsLow.setText("1.73");
-            }
-            if(!btnHigh.isDisabled()){
-                oddsHigh.setText("2.26");
-            }
-        } else if(currentCardVal == 9){
-            if(!btnLow.isDisabled()){
-                oddsLow.setText("1.56");
-            }
-            if(!btnHigh.isDisabled()){
-                oddsHigh.setText("2.53");
-            }
-        } else if(currentCardVal == 10){
-            if(!btnLow.isDisabled()){
-                oddsLow.setText("1.33");
-            }
-            if(!btnHigh.isDisabled()){
-                oddsHigh.setText("2.72");
-            }
-        } else if(currentCardVal == 11){
-            if(!btnLow.isDisabled()){
-                oddsLow.setText("1.21");
-            }
-            if(!btnHigh.isDisabled()){
-                oddsHigh.setText("3.32");
-            }
-        } else if(currentCardVal == 12){
-            if(!btnLow.isDisabled()){
-                oddsLow.setText("1.01");
-            }
-            if(!btnHigh.isDisabled()){
-                oddsHigh.setText("6.31");
-            }
-        } else if(currentCardVal == 13){
-            if(!btnLow.isDisabled()){
-                oddsLow.setText("0.89");
-            }
-            if(!btnHigh.isDisabled()){
-                oddsHigh.setText("13.31");
-            }
-        }
-    }
-
-    public void showMultiplier() {
-        double multiplier;
-        if (!btnHigh.isDisabled()) {
-            multiplier = Double.parseDouble(oddsLow.getText()); // Use currentOddsLow for btnHigh
+        // Check if the skip counter has reached the limit
+        cardSound();
+        if (skipCounter < 7) {
+            initialized(); // Call initialized method
+            skipCounter++; // Increment the skip counter
         } else {
-            multiplier = Double.parseDouble(oddsHigh.getText()); // Use currentOddsHigh for btnLow
+            // Disable the button if the limit is reached
+            btnSkip.setDisable(true);
         }
-        System.out.println(multiplier);
+    }
+    public void disableSkipButton(){
+        if (skipCounter >= 7) {
+            btnSkip.setDisable(true);
+        }
     }
 
-    public void collectPayOut(MouseEvent actionEvent) {
-        setPayout();
+    public void setOddsOfCard(){
+        int currentCardVal = cardValuesMap.get(cardImages[cardNumber1]);
+        if(currentCardVal == 1){
+            oddsHigh.setText("1.12");
+            oddsLow.setText("12.87");
+        } else if(currentCardVal == 2){
+            oddsHigh.setText("1.21");
+            oddsLow.setText("6.23");
+        }else if(currentCardVal == 3){
+            oddsHigh.setText("1.31");
+            oddsLow.setText("4.32");
+        }else if(currentCardVal == 4){
+            oddsHigh.setText("1.34");
+            oddsLow.setText("2.21");
+        }else if(currentCardVal == 5){
+            oddsHigh.setText("1.37");
+            oddsLow.setText("1.84");
+        }else if(currentCardVal == 6){
+            oddsHigh.setText("1.42");
+            oddsLow.setText("1.62");
+        }else if(currentCardVal == 7){
+            oddsHigh.setText("1.52");
+            oddsLow.setText("1.56");
+        }else if(currentCardVal == 8){
+            oddsHigh.setText("1.86");
+            oddsLow.setText("1.42");
+        }else if(currentCardVal == 9){
+            oddsHigh.setText("2.12");
+            oddsLow.setText("1.32");
+        }else if(currentCardVal == 10){
+            oddsHigh.setText("2.44");
+            oddsLow.setText("1.21");
+        }else if(currentCardVal == 11){
+            oddsHigh.setText("4.21");
+            oddsLow.setText("1.24");
+        }else if(currentCardVal == 12){
+            oddsHigh.setText("6.23");
+            oddsLow.setText("1.21");
+        }else if(currentCardVal == 13){
+            oddsHigh.setText("12.85");
+            oddsLow.setText("1.12");
+        } else {
+            oddsLow.setText("");
+            oddsLow.setText("");
+        }
+    }
+
+    public void collectReward(ActionEvent actionEvent) {
+        // Get the final balance from the balancePayout text field
+        if(correctGuessCount == 50){
+            getJackpot();
+            correctGuessCount = 0;
+        }
+        showCollected.setOpacity(1);
+        collectSound();
+        // Pause for 2 seconds before hiding the element and enabling buttons
+        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(2));
+        pauseTransition.setOnFinished(event -> {
+            showCollected.setOpacity(0); // Hide the element after 2 seconds
+        });
+        pauseTransition.play();
+        int finalBalance = Integer.parseInt(balancePayout.getText());
+
+        // Assuming balanceID is the ID of the balance field you want to update
+        // You'll need to replace it with the correct ID of your balance field
+        int currentBalance = Integer.parseInt(balanceID.getText()); // Assuming balanceID is the ID of the balance field
+
+        // Update the balanceID by adding the final balance
+        int updatedBalance = currentBalance + finalBalance;
+        balanceID.setText(String.valueOf(updatedBalance));
+
+        correctGuessCount++;
+
+        balancePayout.setText("");
+
 
         showCardForAMoment();
-        resetBalancePayout();
     }
+    public void setJackpot(){
+        correctGuessCount++;
+        if(correctGuessCount == 50){
+            int jackpot = Integer.parseInt(jackpotID.getText());
+            int initialPayout = Integer.parseInt(balancePayout.getText());
 
-    public void setPayout() {
-        // Get the initial bet amount from the input field
-        int betAmount = Integer.parseInt(inputBalance.getText());
-        balancePayout.setText(String.valueOf(betAmount));
+            // Calculate the updated balance by multiplying the initial payout by the jackpot
+            int updatedBalance = initialPayout * jackpot;
 
-        int currentWin = Integer.parseInt(balancePayout.getText());
-        System.out.println(currentWin);
-
-        double multiplier;
-        if(!btnHigh.isDisabled()){
-            multiplier = Double.parseDouble(oddsHigh.getText());
-        } else{
-            multiplier = Double.parseDouble(oddsLow.getText());
+            // Update the balancePayout field with the updated balance
+            balancePayout.setText(String.valueOf(updatedBalance));
+            correctGuessCount = 0;
         }
-        int newCurrentWin = (int) (currentWin * multiplier);
-        int payout = newCurrentWin - currentWin;
-
-        System.out.println(payout);
-
-    }
-    public void updatePayout(){
-
     }
 
+    public void getJackpot() {
+        // Get the jackpot and current balance values
+        int currentBalance = Integer.parseInt(balanceID.getText());
+        int initialPayout = Integer.parseInt(balancePayout.getText());
 
+        // Calculate the updated balance by multiplying the initial payout by the jackpot
+        int updatedBalance = initialPayout + currentBalance;
+        balanceID.setText(String.valueOf(updatedBalance));
+    }
 
+    public void disableBetButtonForTwoSeconds() {
+        // Disable the buttons
+        betID.setDisable(true);
 
-    public void resetBalancePayout(){
-        balancePayout.setText(String.valueOf(0));
+        // Pause for 2 seconds before enabling the buttons
+        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(2));
+        pauseTransition.setOnFinished(event -> {
+            betID.setDisable(false);
+        });
+        pauseTransition.play();
+    }
+    public void disableCollectButton(){
+        if(correctGuessCount == 3){
+            correctGuessCount++;
+            btnCollect.setDisable(false);
+            correctGuessCount= 0;
+        }
+    }
+    public void collectSound(){
+        String s = "src/main/resources/background_musics/coins_sound.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        mediaPlayer = new MediaPlayer(h);
+        mediaPlayer.play();
+    }
+    public void cardSound(){
+        String s = "src/main/resources/background_musics/card_sound.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        mediaPlayer = new MediaPlayer(h);
+        mediaPlayer.play();
+    }
+    public void winSound(){
+        String s = "src/main/resources/background_musics/win_sound.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        mediaPlayer = new MediaPlayer(h);
+        mediaPlayer.play();
+    }
+    public void loseSound(){
+        String s = "src/main/resources/background_musics/lose_sound.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        mediaPlayer = new MediaPlayer(h);
+        mediaPlayer.play();
     }
 }
