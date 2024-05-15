@@ -1,19 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
-<VBox alignment="CENTER" prefHeight="500.0" prefWidth="500.0" spacing="20.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.casino.HelloController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
-
-    <Label fx:id="welcomeText" />
-    <Button onAction="#onHelloButtonClick" text="Hello!" />
-   <Button mnemonicParsing="false" onAction="#onHiloBTNClick" text="Hilo">
-      <VBox.margin>
-         <Insets />
-      </VBox.margin></Button>
-   <Button mnemonicParsing="false" onAction="#onSlotMachineBTNClick" text="Slut Machine" />
-</VBox>
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="543.0" prefWidth="1070.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.casino.HelloController">
+   <children>
+      <AnchorPane prefHeight="543.0" prefWidth="1070.0" styleClass="root" stylesheets="@styles.css">
+         <children>
+            <Button fx:id="btnHilo" layoutX="25.0" layoutY="135.0" mnemonicParsing="false" onAction="#onHiloBTNClick" prefHeight="243.0" prefWidth="234.0" style="-fx-background-color: black;" stylesheets="@styles.css">
+               <graphic>
+                  <ImageView fitHeight="243.0" fitWidth="234.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../backgrounds/hilobg4.png" />
+                     </image>
+                  </ImageView>
+               </graphic></Button>
+            <Button layoutX="284.0" layoutY="135.0" mnemonicParsing="false" prefHeight="243.0" prefWidth="234.0" text="Button" />
+            <Button layoutX="543.0" layoutY="135.0" mnemonicParsing="false" prefHeight="243.0" prefWidth="234.0" text="Button" />
+            <Button layoutX="804.0" layoutY="135.0" mnemonicParsing="false" prefHeight="243.0" prefWidth="234.0" text="Button" />
+            <Button fx:id="btnDeposit" layoutX="973.0" layoutY="65.0" mnemonicParsing="false" onAction="#goDeposit" text="Deposit" />
+            <Text fill="GOLD" layoutX="32.0" layoutY="88.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Balance: ">
+               <font>
+                  <Font name="Franklin Gothic Medium Italic" size="25.0" />
+               </font>
+            </Text>
+         </children>
+      </AnchorPane>
+   </children>
+</Pane>
