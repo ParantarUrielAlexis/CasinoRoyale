@@ -12,11 +12,11 @@
    <children>
       <AnchorPane prefHeight="543.0" prefWidth="1070.0" styleClass="root" stylesheets="@styles.css">
          <children>
-            <Button fx:id="btnHilo" layoutX="25.0" layoutY="135.0" mnemonicParsing="false" onAction="#onHiloBTNClick" prefHeight="243.0" prefWidth="234.0" style="-fx-background-color: black;" stylesheets="@styles.css">
+            <Button fx:id="btnHilo" layoutX="14.0" layoutY="135.0" mnemonicParsing="false" onAction="#onHiloBTNClick" prefHeight="243.0" prefWidth="234.0" style="-fx-background-color: black;" stylesheets="@styles.css">
                <graphic>
-                  <ImageView fitHeight="243.0" fitWidth="234.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="241.0" fitWidth="235.0" pickOnBounds="true">
                      <image>
-                        <Image url="@../../../backgrounds/hilobg4.png" />
+                        <Image url="@../../../backgrounds/hilobg.png" />
                      </image>
                   </ImageView>
                </graphic></Button>

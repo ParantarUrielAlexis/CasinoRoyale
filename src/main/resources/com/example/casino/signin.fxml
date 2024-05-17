@@ -23,7 +23,7 @@
             <Button fx:id="btnRegister" layoutX="361.0" layoutY="412.0" mnemonicParsing="false" onAction="#handleSignIn" prefHeight="42.0" prefWidth="247.0" styleClass="btnShow" stylesheets="@styles.css" text="Sign In" />
             <Button fx:id="btnSignIn" layoutX="356.0" layoutY="570.0" mnemonicParsing="false" onAction="#handleRegister" prefHeight="30.0" prefWidth="247.0" styleClass="btnShow" stylesheets="@styles.css" text="Register" />
             <PasswordField fx:id="pfPassword" layoutX="361.0" layoutY="303.0" prefHeight="42.0" prefWidth="247.0" promptText="Password" styleClass="textfield" stylesheets="@styles.css" />
-            <TextField fx:id="ShowPassword" layoutX="359.0" layoutY="304.0" prefHeight="42.0" prefWidth="247.0" promptText="Password:" styleClass="textfield" stylesheets="@styles.css" visible="false" />
+            <TextField fx:id="ShowPassword" layoutX="361.0" layoutY="303.0" prefHeight="42.0" prefWidth="247.0" promptText="Password:" styleClass="textfield" stylesheets="@styles.css" visible="false" />
             <CheckBox fx:id="cbBtn" layoutX="362.0" layoutY="371.0" mnemonicParsing="false" onAction="#showPassword" styleClass="textShow" stylesheets="@styles.css" text="Show password" textFill="WHITE">
                <font>
                   <Font name="Cambria" size="13.0" />

@@ -1,9 +1,10 @@
 package com.example.casino;
 
-import javafx.animation.PauseTransition;
+import javafx.animation.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -22,7 +23,6 @@ import java.util.Objects;
 import java.util.Random;
 
 public class HiloController {
-
     @FXML
     public ImageView cardRandomizer;
 
@@ -31,6 +31,8 @@ public class HiloController {
 
     @FXML
     public ImageView showLose,showWin, showCollected;
+    @FXML
+    public ImageView foreground;
 
     public Button btnHigh;
     @FXML
@@ -49,14 +51,75 @@ public class HiloController {
     public Text showNoStake, showINoBalance;
     @FXML
     public TextField inputBalance;
-
+    @FXML
+    public ProgressBar progressBarID;
     @FXML
     public Text oddsHigh, oddsLow, balancePayout;
+
 
     MediaPlayer mediaPlayer;
     public int cardNumber1;
     private int skipCounter = 1;
     private int correctGuessCount = 0;
+    public void setForeground() {
+        foreground.setVisible(true); // Set visibility to true initially
+        progressBarID.setVisible(true); // Set visibility to true initially
+        progress();
+        // Fade out animation for progressBarID
+        FadeTransition fadeOutProgressBar = new FadeTransition(Duration.seconds(1), progressBarID);
+        fadeOutProgressBar.setFromValue(1);
+        fadeOutProgressBar.setToValue(0);
+
+        // Pause for 3 seconds before starting the fade-out animation for progressBarID
+        PauseTransition pauseProgressBar = new PauseTransition(Duration.seconds(3));
+        pauseProgressBar.setOnFinished(event -> fadeOutProgressBar.play());
+
+        // Set visibility to false after fade-out for progressBarID
+        fadeOutProgressBar.setOnFinished(event -> {
+            progressBarID.setVisible(false);
+            // After progressBarID fade-out, start progress
+
+        });
+
+        // Fade out animation for foreground
+        FadeTransition fadeOutForeground = new FadeTransition(Duration.seconds(1), foreground);
+        fadeOutForeground.setFromValue(1);
+        fadeOutForeground.setToValue(0);
+
+        // Pause for 3 seconds before starting the fade-out animation for foreground
+        PauseTransition pauseForeground = new PauseTransition(Duration.seconds(3));
+        pauseForeground.setOnFinished(event -> fadeOutForeground.play());
+
+        // Set visibility to false after fade-out for foreground
+        fadeOutForeground.setOnFinished(event -> {
+            foreground.setVisible(false);
+        });
+
+        // Start the pause transition for progressBarID
+        pauseProgressBar.play();
+        // Start the pause transition for foreground
+        pauseForeground.play();
+    }
+
+    public void progress() {
+        // Set initial progress
+        progressBarID.setProgress(0);
+
+        // Define the duration for the progress animation (in milliseconds)
+        int durationMillis = 3000; // 3 seconds
+
+        // Create a Timeline animation
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.ZERO, new KeyValue(progressBarID.progressProperty(), 0)),
+                new KeyFrame(Duration.millis(durationMillis), new KeyValue(progressBarID.progressProperty(), 1))
+        );
+
+        // Play the timeline animation
+        timeline.play();
+    }
+
+
+
 
     public static final String[] cardImages = {
             "ace_of_spades.png", "ace_of_hearts.png", "ace_of_clubs.png", "ace_of_diamonds.png",
@@ -73,6 +136,7 @@ public class HiloController {
             "queen_of_clubs.png", "queen_of_diamonds.png", "queen_of_spades.png", "queen_of_hearts.png",
             "king_of_clubs.png", "king_of_diamonds.png", "king_of_spades.png", "king_of_hearts.png",
     };
+
 
     // Map to store card values
     public static final Map<String, Integer> cardValuesMap = new HashMap<>();
@@ -149,6 +213,7 @@ public class HiloController {
     // Your existing code...
 
     public void initialized() {
+
         // Generate random card numbers for each ImageView
         cardNumber1 = new Random().nextInt(52); // 0 to 51
         int cardNumber2 = new Random().nextInt(52);
@@ -440,13 +505,13 @@ public class HiloController {
     public void setOddsOfCard(){
         int currentCardVal = cardValuesMap.get(cardImages[cardNumber1]);
         if(currentCardVal == 1){
-            oddsHigh.setText("1.12");
+            oddsHigh.setText("1.10");
             oddsLow.setText("12.87");
         } else if(currentCardVal == 2){
-            oddsHigh.setText("1.21");
+            oddsHigh.setText("1.13");
             oddsLow.setText("6.23");
         }else if(currentCardVal == 3){
-            oddsHigh.setText("1.31");
+            oddsHigh.setText("1.21");
             oddsLow.setText("4.32");
         }else if(currentCardVal == 4){
             oddsHigh.setText("1.34");
@@ -465,19 +530,19 @@ public class HiloController {
             oddsLow.setText("1.42");
         }else if(currentCardVal == 9){
             oddsHigh.setText("2.12");
-            oddsLow.setText("1.32");
+            oddsLow.setText("1.39");
         }else if(currentCardVal == 10){
             oddsHigh.setText("2.44");
-            oddsLow.setText("1.21");
+            oddsLow.setText("1.35");
         }else if(currentCardVal == 11){
             oddsHigh.setText("4.21");
             oddsLow.setText("1.24");
         }else if(currentCardVal == 12){
             oddsHigh.setText("6.23");
-            oddsLow.setText("1.21");
+            oddsLow.setText("1.12");
         }else if(currentCardVal == 13){
             oddsHigh.setText("12.85");
-            oddsLow.setText("1.12");
+            oddsLow.setText("1.10");
         } else {
             oddsLow.setText("");
             oddsLow.setText("");
