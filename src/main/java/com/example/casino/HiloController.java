@@ -61,6 +61,9 @@ public class HiloController {
     public int cardNumber1;
     private int skipCounter = 1;
     private int correctGuessCount = 0;
+
+    // user balance user
+    static int userBalance;
     public void setForeground() {
         foreground.setVisible(true); // Set visibility to true initially
         progressBarID.setVisible(true); // Set visibility to true initially
@@ -240,6 +243,9 @@ public class HiloController {
 
 
     public int playGame() {
+
+        balanceID.setText(String.valueOf(userBalance));
+
         if (inputBalance.getText().isEmpty()) {
             showNoStake.setOpacity(1);
             return -1; // Return -1 to indicate no bet amount entered

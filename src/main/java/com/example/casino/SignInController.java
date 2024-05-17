@@ -34,6 +34,13 @@ public class SignInController {
     @FXML
     private TextField ShowPassword;
 
+    // used to get the userID so we can get balance
+    static int userID;
+
+    public static int getUserId() {
+        return userID;
+    }
+
     @FXML
     protected void initialize() {
         tfUsername.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -95,11 +102,11 @@ public class SignInController {
              Statement statement = c.createStatement()) {
             String selectQuery = "SELECT * FROM users";
             ResultSet result = statement.executeQuery(selectQuery);
-            boolean found = false;
             while (result.next()) {
                 String dbUsername = result.getString("username");
                 String dbPassword = result.getString("password");
                 if (username.equals(dbUsername) && password.equals(dbPassword)) {
+                    userID = result.getInt("id");
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("hello-view.fxml"));
                     try {
                         Scene scene = new Scene(loader.load());

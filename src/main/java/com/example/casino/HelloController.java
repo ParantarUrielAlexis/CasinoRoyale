@@ -18,6 +18,10 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class HelloController {
     private double originalWidth = 462.0;
@@ -25,9 +29,25 @@ public class HelloController {
 
     @FXML
     public void onHiloBTNClick(ActionEvent event) {
-        music();
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("hi-lo.fxml"));
+        music();
+        // code for userbalance
+        try (Connection c = MySQLConnection.getConnection();
+             Statement statement = c.createStatement()) {
+
+            String selectQuery = "SELECT * FROM users where id = " + SignInController.getUserId();
+            ResultSet result = statement.executeQuery(selectQuery);
+
+            if (result.next()) {
+                HiloController.userBalance = result.getInt("balance");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(HiloController.userBalance);
         try {
 
             Parent root = loader.load();
