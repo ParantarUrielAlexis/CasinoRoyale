@@ -10,7 +10,6 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
 
-import javax.swing.text.LabelView;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -77,7 +76,6 @@ public class SignInController {
         String password = pfPassword.getText();
 
         if (username.equals("admin") && password.equals("123456")) {
-
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("dashboard.fxml"));
                 Parent root = loader.load();
@@ -109,7 +107,10 @@ public class SignInController {
                     userID = result.getInt("id");
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("hello-view.fxml"));
                     try {
-                        Scene scene = new Scene(loader.load());
+                        Parent root = loader.load();
+                        HelloController helloController = loader.getController();
+                        helloController.initialize(userID);
+                        Scene scene = new Scene(root);
                         Stage stage = (Stage) tfUsername.getScene().getWindow();
                         stage.setScene(scene);
                         stage.setTitle("User Area");
@@ -138,8 +139,6 @@ public class SignInController {
             pfPassword.setVisible(true);
         }
     }
-
-
 
     public void handleRegister(ActionEvent actionEvent) {
         try {

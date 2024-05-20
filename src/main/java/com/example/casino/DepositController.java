@@ -28,7 +28,10 @@ public class DepositController {
     @FXML
     public Button btnDeposit, btnWithdraw;
 
-    public void initialize(){
+    private int userId;
+
+    public void initialize(int userId) {
+        this.userId = userId;
         updateBalance();
     }
 
@@ -64,7 +67,7 @@ public class DepositController {
             String updateBalanceQuery = "UPDATE users SET balance = balance + ? WHERE id = ?";
             try (PreparedStatement updateBalanceStatement = connection.prepareStatement(updateBalanceQuery)) {
                 updateBalanceStatement.setDouble(1, depositAmount);
-                updateBalanceStatement.setInt(2, 1); // Assuming user ID is 1, replace it with the actual user ID source
+                updateBalanceStatement.setInt(2, userId);
                 int rowsUpdated = updateBalanceStatement.executeUpdate();
 
                 if (rowsUpdated > 0) {
@@ -102,7 +105,7 @@ public class DepositController {
             // Retrieve the current balance from the database
             String getBalanceQuery = "SELECT balance FROM users WHERE id = ?";
             try (PreparedStatement getBalanceStatement = connection.prepareStatement(getBalanceQuery)) {
-                getBalanceStatement.setInt(1, 1); // Assuming user ID is 1, replace it with the actual user ID source
+                getBalanceStatement.setInt(1, userId);
                 ResultSet resultSet = getBalanceStatement.executeQuery();
                 if (resultSet.next()) {
                     double currentBalance = resultSet.getDouble("balance");
@@ -113,7 +116,7 @@ public class DepositController {
                         String updateBalanceQuery = "UPDATE users SET balance = balance - ? WHERE id = ?";
                         try (PreparedStatement updateBalanceStatement = connection.prepareStatement(updateBalanceQuery)) {
                             updateBalanceStatement.setDouble(1, withdrawAmount);
-                            updateBalanceStatement.setInt(2, 1); // Assuming user ID is 1, replace it with the actual user ID source
+                            updateBalanceStatement.setInt(2, userId);
                             int rowsUpdated = updateBalanceStatement.executeUpdate();
 
                             if (rowsUpdated > 0) {
@@ -147,7 +150,7 @@ public class DepositController {
             // Retrieve the current balance from the database
             String getBalanceQuery = "SELECT balance FROM users WHERE id = ?";
             try (PreparedStatement getBalanceStatement = connection.prepareStatement(getBalanceQuery)) {
-                getBalanceStatement.setInt(1, 1); // Assuming user ID is 1, replace it with the actual user ID source
+                getBalanceStatement.setInt(1, userId);
                 ResultSet resultSet = getBalanceStatement.executeQuery();
                 if (resultSet.next()) {
                     double updatedBalance = resultSet.getDouble("balance");
@@ -160,111 +163,6 @@ public class DepositController {
             e.printStackTrace();
             // You might want to show an error message to the user here
         }
-    }// Modify the method to update the balance for the authenticated user
-    private void updateBalance(int userId) {
-        try (Connection connection = MySQLConnection.getConnection()) {
-            // Retrieve the current balance from the database
-            String getBalanceQuery = "SELECT balance FROM users WHERE id = ?";
-            try (PreparedStatement getBalanceStatement = connection.prepareStatement(getBalanceQuery)) {
-                getBalanceStatement.setInt(1, userId);
-                ResultSet resultSet = getBalanceStatement.executeQuery();
-                if (resultSet.next()) {
-                    double updatedBalance = resultSet.getDouble("balance");
-                    // Update the balance displayed on the UI
-                    balanceID.setText(String.valueOf(updatedBalance));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // You might want to show an error message to the user here
-        }
-    }
-
-    // Modify the depositMoney method to use the authenticated user's ID
-    public void depositMoney(ActionEvent actionEvent, int userId) {
-        // Get the deposited amount
-        double depositAmount = Double.parseDouble(deposit_id.getText());
-
-        // Connect to the database
-        try (Connection connection = MySQLConnection.getConnection()) {
-            // Update the user's balance in the database
-            String updateBalanceQuery = "UPDATE users SET balance = balance + ? WHERE id = ?";
-            try (PreparedStatement updateBalanceStatement = connection.prepareStatement(updateBalanceQuery)) {
-                updateBalanceStatement.setDouble(1, depositAmount);
-                updateBalanceStatement.setInt(2, userId);
-                int rowsUpdated = updateBalanceStatement.executeUpdate();
-
-                if (rowsUpdated > 0) {
-                    // Balance updated successfully
-                    updateBalance(userId);
-                } else {
-                    // No user with the specified ID found
-                    System.out.println("User not found");
-                    // You might want to show an error message to the user here
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // You might want to show an error message to the user here
-        }
-    }
-
-    // Modify the withdrawMoney method to use the authenticated user's ID
-    public void withdrawMoney(ActionEvent actionEvent, int userId) {
-        // Get the withdrawal amount
-        double withdrawAmount = Double.parseDouble(withdraw_id.getText());
-
-        // Connect to the database
-        try (Connection connection = MySQLConnection.getConnection()) {
-            // Check if the withdrawal amount is valid
-            if (withdrawAmount <= 0) {
-                System.out.println("Invalid withdrawal amount");
-                // You might want to show an error message to the user here
-                return;
-            }
-
-            // Retrieve the current balance from the database
-            String getBalanceQuery = "SELECT balance FROM users WHERE id = ?";
-            try (PreparedStatement getBalanceStatement = connection.prepareStatement(getBalanceQuery)) {
-                getBalanceStatement.setInt(1, userId);
-                ResultSet resultSet = getBalanceStatement.executeQuery();
-                if (resultSet.next()) {
-                    double currentBalance = resultSet.getDouble("balance");
-
-                    // Check if the user has sufficient balance for withdrawal
-                    if (currentBalance >= withdrawAmount) {
-                        // Update the user's balance in the database
-                        String updateBalanceQuery = "UPDATE users SET balance = balance - ? WHERE id = ?";
-                        try (PreparedStatement updateBalanceStatement = connection.prepareStatement(updateBalanceQuery)) {
-                            updateBalanceStatement.setDouble(1, withdrawAmount);
-                            updateBalanceStatement.setInt(2, userId);
-                            int rowsUpdated = updateBalanceStatement.executeUpdate();
-
-                            if (rowsUpdated > 0) {
-                                // Balance updated successfully
-                                updateBalance(userId);
-                            } else {
-                                // No user with the specified ID found
-                                System.out.println("User not found");
-                                // You might want to show an error message to the user here
-                            }
-                        }
-                    } else {
-                        // Insufficient balance
-                        System.out.println("Insufficient balance for withdrawal");
-                        // You might want to show an error message to the user here
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // You might want to show an error message to the user here
-        }
-    }
-
-    // Modify the initialize method to update the balance for the authenticated user
-    public void initialize(int userId) {
-        updateBalance(userId);
     }
 
 }

@@ -7,12 +7,9 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -27,16 +24,22 @@ public class HelloController {
     private double originalWidth = 462.0;
     private double originalHeight = 701.0;
 
+    private int userId;
+
+    public void initialize(int userId) {
+        this.userId = userId;
+    }
+
     @FXML
     public void onHiloBTNClick(ActionEvent event) {
-
         FXMLLoader loader = new FXMLLoader(getClass().getResource("hi-lo.fxml"));
         music();
-        // code for userbalance
+
+        // code for user balance
         try (Connection c = MySQLConnection.getConnection();
              Statement statement = c.createStatement()) {
 
-            String selectQuery = "SELECT * FROM users where id = " + SignInController.getUserId();
+            String selectQuery = "SELECT * FROM users where id = " + userId;
             ResultSet result = statement.executeQuery(selectQuery);
 
             if (result.next()) {
@@ -49,12 +52,10 @@ public class HelloController {
 
         System.out.println(HiloController.userBalance);
         try {
-
             Parent root = loader.load();
             Scene scene = new Scene(root);
 
             HiloController hiloController = loader.getController();
-
             hiloController.setForeground();
 
             // Set the background color of the scene to black
@@ -122,9 +123,6 @@ public class HelloController {
         root.resize(originalWidth, originalHeight);
     }
 
-
-
-
     public void onSlotMachineBTNClick(ActionEvent actionEvent) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("SlotMachine.fxml"));
         Parent root = fxmlLoader.load();
@@ -133,7 +131,9 @@ public class HelloController {
         stage.setScene(scene);
         stage.show();
     }
+
     MediaPlayer mediaPlayer;
+
     public void music() {
         String s = "src/main/resources/background_musics/jazz.mp3";
         Media h = new Media(Paths.get(s).toUri().toString());
@@ -149,10 +149,16 @@ public class HelloController {
 
         mediaPlayer.play();
     }
+
     public void goDeposit(ActionEvent event) {
         try {
             // Load the FXML file
-            Parent root = FXMLLoader.load(getClass().getResource("deposit.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("deposit.fxml"));
+            Parent root = loader.load();
+
+            // Get the DepositController and pass the userId to it
+            DepositController depositController = loader.getController();
+            depositController.initialize(userId);
 
             // Create a new scene with the loaded FXML file
             Scene scene = new Scene(root);
@@ -170,5 +176,4 @@ public class HelloController {
             // You might want to show an error message to the user here
         }
     }
-
 }
